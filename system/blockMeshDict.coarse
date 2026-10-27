@@ -1,0 +1,148 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2606                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Axisymmetric 5-degree wedge model of a capillary rheometer + exit zone:
+// - Barrel:       D_b = 9.55 mm (R_b = 4.775 mm), x = 0 .. 20 mm (L_b = 20 mm)
+// - Capillary:    D_c = 1.00 mm (R_c = 0.500 mm), x = 20 .. 30 mm (L_c = 10 mm)
+// - Exit chamber: D_e = 9.55 mm (R_e = 4.775 mm), x = 30 .. 45 mm (L_e = 15 mm)
+// Mesh preset: coarse (2,960 cells)
+
+mergeType points;
+
+scale   0.001;
+
+vertices
+(
+    // Axis of symmetry (r = 0)
+    ( 0  0.0              0.0            ) // 0: barrel inlet axis
+    (20  0.0              0.0            ) // 1: contraction plane axis
+    (30  0.0              0.0            ) // 2: capillary exit axis
+    (45  0.0              0.0            ) // 3: exit chamber outlet axis
+
+    // Front wedge plane (z < 0) at r_1 = 0.5 mm (capillary radius)
+    ( 0  0.499524110791  -0.021809693683 ) // 4
+    (20  0.499524110791  -0.021809693683 ) // 5
+    (30  0.499524110791  -0.021809693683 ) // 6
+    (45  0.499524110791  -0.021809693683 ) // 7
+
+    // Front wedge plane (z < 0) at r_2 = 4.775 mm (barrel / chamber radius)
+    ( 0  4.770455258053  -0.208282574669 ) // 8
+    (20  4.770455258053  -0.208282574669 ) // 9
+    (30  4.770455258053  -0.208282574669 ) // 10
+    (45  4.770455258053  -0.208282574669 ) // 11
+
+    // Back wedge plane (z > 0) at r_1 = 0.5 mm (capillary radius)
+    ( 0  0.499524110791   0.021809693683 ) // 12
+    (20  0.499524110791   0.021809693683 ) // 13
+    (30  0.499524110791   0.021809693683 ) // 14
+    (45  0.499524110791   0.021809693683 ) // 15
+
+    // Back wedge plane (z > 0) at r_2 = 4.775 mm (barrel / chamber radius)
+    ( 0  4.770455258053   0.208282574669 ) // 16
+    (20  4.770455258053   0.208282574669 ) // 17
+    (30  4.770455258053   0.208282574669 ) // 18
+    (45  4.770455258053   0.208282574669 ) // 19
+);
+
+blocks
+(
+    // Block 0: Barrel inner core (x: 0..20 mm, r: 0..0.5 mm)
+    hex (0 1 5 4 0 1 13 12) (40 8 1) simpleGrading (0.5 1 1)
+
+    // Block 1: Barrel outer annulus (x: 0..20 mm, r: 0.5..4.775 mm)
+    hex (4 5 9 8 12 13 17 16) (40 24 1) simpleGrading (0.5 4 1)
+
+    // Block 2: Capillary die (x: 20..30 mm, r: 0..0.5 mm)
+    hex (1 2 6 5 1 2 14 13) (30 8 1) simpleGrading (1 1 1)
+
+    // Block 3: Exit chamber inner core (x: 30..45 mm, r: 0..0.5 mm)
+    hex (2 3 7 6 2 3 15 14) (45 8 1) simpleGrading (1 1 1)
+
+    // Block 4: Exit chamber outer annulus (x: 30..45 mm, r: 0.5..4.775 mm)
+    hex (6 7 11 10 14 15 19 18) (45 24 1) simpleGrading (1 4 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 4 12 0)
+            (4 8 16 12)
+        );
+    }
+
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (3 7 15 3)
+            (7 11 19 15)
+        );
+    }
+
+    walls
+    {
+        type wall;
+        faces
+        (
+            (8 16 17 9)
+            (5 9 17 13)
+            (5 13 14 6)
+            (6 14 18 10)
+            (10 18 19 11)
+        );
+    }
+
+    front
+    {
+        type wedge;
+        faces
+        (
+            (0 4 5 1)
+            (4 8 9 5)
+            (1 5 6 2)
+            (2 6 7 3)
+            (6 10 11 7)
+        );
+    }
+
+    back
+    {
+        type wedge;
+        faces
+        (
+            (0 1 13 12)
+            (12 13 17 16)
+            (1 2 14 13)
+            (2 3 15 14)
+            (14 15 19 18)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+
+// ************************************************************************* //

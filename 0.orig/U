@@ -1,0 +1,57 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2606                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    inlet
+    {
+        // Equivalent to U = 0.01 m/s over the 5-deg wedge inlet patch
+        // A_wedge = 9.93602736e-07 m^2 -> Q_wedge = U * A_wedge = 9.93602736e-09 m^3/s
+        // (Full 360-deg barrel area A_full = 7.163028e-05 m^2, Q_full = 7.163028e-07 m^3/s)
+        type                flowRateInletVelocity;
+        volumetricFlowRate  constant 9.93602736e-09;
+        value               uniform (0.01 0 0);
+    }
+
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      uniform (0 0 0);
+        value           uniform (0 0 0);
+    }
+
+    walls
+    {
+        type            noSlip;
+    }
+
+    front
+    {
+        type            wedge;
+    }
+
+    back
+    {
+        type            wedge;
+    }
+}
+
+
+// ************************************************************************* //
